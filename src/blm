@@ -1,0 +1,118 @@
+#!/bin/bash
+
+# Prevent re-launching in login shells
+if [ $NOLM ]; then
+    return
+fi
+
+# Find the configuration file
+if [ -f "$HOME/.config/blm/blm.conf" ]; then
+    CONF="$HOME/.config/blm/blm.conf"
+elif [ -f "$HOME/.blm.conf" ]; then
+    CONF="$HOME/.blm.conf"
+elif [ -f "/etc/blm.conf" ]; then
+    CONF="/etc/blm.conf"
+else
+    echo "No config file found. Falling back to shell."
+    return 1
+fi
+
+# Read user config (credit http://stackoverflow.com/a/20815951)
+while IFS='= ' read lhs rhs
+do
+    if [[ ! $lhs =~ ^\ *# && -n $lhs ]]; then
+        rhs="${rhs%%\#*}"    # Del in line right comments
+        rhs="${rhs%%*( )}"   # Del trailing spaces
+        rhs="${rhs%\"*}"     # Del opening string quotes
+        rhs="${rhs#\"*}"     # Del closing string quotes
+        declare $lhs="$rhs"
+    fi
+done < $CONF
+
+# Check if the given folders exist
+if [ ! -d $XSESSIONS ] || [ ! -d $OSESSIONS ]; then
+    echo "Session folder does not exist. Falling back to shell."
+    echo $XSESSIONS $OSESSIONS
+    return 1
+fi
+
+# Get the current tty and an available display
+function get_requirements {
+    local display=0
+    export DISPLAY=:0
+
+    while [[ `xset -q` ]]; do
+        ((display++))
+        DISPLAY=:$display
+    done
+    clear
+
+    DISPLAY=:$display
+    TTY=`fgconsole`
+}
+
+# Prepare the items for the dialog menu
+function get_dialog_menu_items {
+    local i=1
+
+    while [ $i -le ${#sessions[@]} ]; do
+        sessionMenuItems=( ${sessionMenuItems[@]}\
+                               $i ${sessions[$(( i - 1 ))]##*/} )
+        ((i++))
+    done
+}
+
+# Prepare the items for the (built-in) select menu
+function get_select_menu_items {
+    for session in ${sessions[@]}; do
+        sessionMenuItems=( ${sessionMenuItems[@]} ${session##*/} )
+    done
+}
+
+# Accumulate all sessions saved in the config folders and check if we have any
+sessions=( $XSESSIONS/* $OSESSIONS/* )
+if [ ${#sessionMenuItems[@]} -eq 0 ]; then
+    clear
+    echo "No files found in $XSESSIONS and $OSESSIONS"
+    echo "Please create .xinitrc-style or bash scripts that end in another\
+ session exec'd respectively, or set the directories in the blm.conf file"
+fi
+
+# Let the user pick the script they want to execute
+if [ $MODE = "text" ]; then
+    clear
+    get_select_menu_items
+
+    select session in ${sessionMenuItems[@]}; do
+        break
+    done
+else
+    get_dialog_menu_items
+
+    dialog --title "blm" --menu "$PS3" 15 55 5 ${sessionMenuItems[@]}\
+           2>/tmp/dialogpick
+
+    if [ $? -eq 1 ]; then
+        rm /tmp/dialogpick
+        exit
+    fi
+    REPLY=`cat /tmp/dialogpick`
+    rm /tmp/dialogpick
+fi
+clear
+
+# We need to know in which array this session was to avoid problems with
+# duplicate file names
+osessions=( $OSESSIONS/* )
+osessionN=${#osessions[@]}
+if [ $REPLY -le $(( ${#sessions[@]} - $osessionN )) ]; then
+    get_requirements
+    exec /usr/bin/xinit ${sessions[$(( $REPLY - 1 ))]} -- $DISPLAY vt$TTY
+else
+    export NOLM=true
+    exec ${sessions[$(( $REPLY - 1 ))]}
+fi
+
+# If we get here something went horribly wrong. Abort!
+echo "Something went wrong. Falling back to shell."
+return 1
