@@ -5,6 +5,16 @@ if [ $NOLM ]; then
     return
 fi
 
+# Default settings
+PS3="Select session: "
+MODE="dialog"
+HEIGHT=15
+ITEMHEIGHT=5
+WIDTH=55
+XSESSIONS="$HOME/.config/blm/xsessions"
+OSESSIONS="$HOME/.config/blm/osessions"
+MENUS="$HOME/.config/blm/menus"
+
 # Find the configuration file
 if [ -f "$HOME/.config/blm/blm.conf" ]; then
     CONF="$HOME/.config/blm/blm.conf"
@@ -29,13 +39,6 @@ do
     fi
 done < $CONF
 
-# Check if the given folders exist
-if [ ! -d $XSESSIONS ] || [ ! -d $OSESSIONS ]; then
-    echo "Session folder does not exist. Falling back to shell."
-    echo $XSESSIONS $OSESSIONS
-    return 1
-fi
-
 # Get the current tty and an available display
 function get_requirements {
     local display=0
@@ -54,6 +57,7 @@ function get_requirements {
 # Prepare the items for the dialog menu
 function get_dialog_menu_items {
     local i=1
+    unset sessionMenuItems
 
     while [ $i -le ${#sessions[@]} ]; do
         sessionMenuItems=( ${sessionMenuItems[@]}\
@@ -64,33 +68,67 @@ function get_dialog_menu_items {
 
 # Prepare the items for the (built-in) select menu
 function get_select_menu_items {
+    unset sessionMenuItems
     for session in ${sessions[@]}; do
         sessionMenuItems=( ${sessionMenuItems[@]} ${session##*/} )
     done
 }
 
 # Accumulate all sessions saved in the config folders and check if we have any
-sessions=( $XSESSIONS/* $OSESSIONS/* )
-if [ ${#sessionMenuItems[@]} -eq 0 ]; then
-    clear
-    echo "No files found in $XSESSIONS and $OSESSIONS"
-    echo "Please create .xinitrc-style or bash scripts that end in another\
- session exec'd respectively, or set the directories in the blm.conf file"
-fi
+function get_sessions {
+    shopt -s nullglob
+    sessions=( $XSESSIONS/* $OSESSIONS/* $MENUS/* )
+    if [ ${#sessions[@]} -eq 0 ]; then
+        clear
+        echo "No files found in $XSESSIONS, $OSESSIONS or $MENUS"
+        echo "Please create .xinitrc-style, scripts that end in another\
+ session exec'd, or directories containing such respectively, or set the\
+ correct directories in the blm.conf file"
+        echo "Falling back to shell"
+        return 1
+    fi
+}
 
-# Let the user pick the script they want to execute
-if [ $MODE = "text" ]; then
+# Recursively select the session using bash select
+function select_menu {
     clear
+    get_sessions
+    if [ $? -eq 1 ]; then
+        return 1;
+    fi
     get_select_menu_items
+    menus=( $MENUS/* )
+    menuN=${#menus[@]}
 
     select session in ${sessionMenuItems[@]}; do
-        break
-    done
-else
-    get_dialog_menu_items
+        if [ $REPLY -le $(( ${#sessions[@]} - $menuN )) ]; then
+            break
+        else
+            XSESSIONS="$MENUS/$session/xsessions"
+            OSESSIONS="$MENUS/$session/osessions"
+            MENUS="$MENUS/$session/menus"
 
-    dialog --title "blm" --menu "$PS3" 15 55 5 ${sessionMenuItems[@]}\
-           2>/tmp/dialogpick
+            select_menu
+            if [ $? -eq 1 ]; then
+                return 1;
+            fi
+            break
+        fi
+    done
+}
+
+# Recursively select the session using dialog
+function dialog_menu {
+    get_sessions
+    if [ $? -eq 1 ]; then
+        return 1;
+    fi
+    get_dialog_menu_items
+    menus=( $MENUS/* )
+    menuN=${#menus[@]}
+
+    dialog --title "blm" --menu "$PS3" $HEIGHT $WIDTH $ITEMHEIGHT\
+           ${sessionMenuItems[@]} 2>/tmp/dialogpick
 
     if [ $? -eq 1 ]; then
         rm /tmp/dialogpick
@@ -98,6 +136,33 @@ else
     fi
     REPLY=`cat /tmp/dialogpick`
     rm /tmp/dialogpick
+
+    if [ $REPLY -le $(( ${#sessions[@]} - $menuN )) ]; then
+        return
+    else
+        XSESSIONS="${sessions[$(( $REPLY - 1 ))]}/xsessions"
+        OSESSIONS="${sessions[$(( $REPLY - 1 ))]}/osessions"
+        MENUS="${session[$(( $REPLY - 1 ))]}/menus"
+
+        dialog_menu
+        if [ $? -eq 1 ]; then
+            return 1
+        fi
+        return
+    fi
+}
+
+# Let the user pick the script they want to execute
+if [ $MODE = "text" ]; then
+    select_menu
+    if [ $? -eq 1 ]; then
+        return 1
+    fi
+else
+    dialog_menu
+    if [ $? -eq 1 ]; then
+        return 1
+    fi
 fi
 clear
 
@@ -105,7 +170,8 @@ clear
 # duplicate file names
 osessions=( $OSESSIONS/* )
 osessionN=${#osessions[@]}
-if [ $REPLY -le $(( ${#sessions[@]} - $osessionN )) ]; then
+# If we subtract the number of menus we get the last index of all sessions
+if [ $REPLY -le $(( ${#sessions[@]} - $osessionN - $menuN )) ]; then
     get_requirements
     exec /usr/bin/xinit ${sessions[$(( $REPLY - 1 ))]} -- $DISPLAY vt$TTY
 else
