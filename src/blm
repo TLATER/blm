@@ -1,5 +1,10 @@
 #!/bin/bash
 
+# Prevent launching in interactive shells
+if [ $TERM != "linux" ]; then
+    return
+fi
+
 # Prevent re-launching in login shells
 if [ $NOLM ]; then
     return
