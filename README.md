@@ -26,7 +26,7 @@ Options:
 
 - PS3 :: Specifies the prompt.
 - MODE :: "text"/"dialog" Specifies the display mode. For mode "dialog" the dialog library must be installed.
-- XSESSIONS :: The x sessions directory path (see [Sessions](#Sesions)).
+- XSESSIONS :: The x sessions directory path (see [Sessions](#sessions)).
 - OSESSIONS :: The directory path for non-x sessions.
 - MENUS :: The directory path containing sub-menus.
 
