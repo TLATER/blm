@@ -39,7 +39,7 @@ Dialog-specific options:
 There are 2 session types:
 
 - Xsessions :: Sessions launched using `xinit`. The file is executed after X launches, much like the .xinit file when launching using startx.
-- Osessions :: Sessions launched using exec. These are shell scripts that are executed. A simple example would be, for example, `exec /bin/bash` for a normal tty.
+- Osessions :: Sessions launched using `exec`. These are shell scripts that are executed. A simple example would be, for example, `exec /bin/bash` for a normal tty.
 
 Besides these, "menus" can be created.
 
