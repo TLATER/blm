@@ -1,5 +1,6 @@
 #!/bin/bash
+#
+# Installs blm to default locations.
 
-install -d /usr/bin /etc
-install -Dm755 src/blm /usr/bin
-install -Dm644 src/blm.conf /etc/blm.conf
+install -Do root -g root -m 0755 blm /usr/bin/blm
+install -Do root -g root -m 0644 blm.conf /etc/blm/blm.conf
