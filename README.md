@@ -39,7 +39,7 @@ the relevant directories as specified in your configuration file.
 | Option    | Values            | Default              | Function                                                                            |
 |-----------|-------------------|----------------------|-------------------------------------------------------------------------------------|
 | PS3       | string            | "Select session: "   | Specifies the prompt.                                                               |
-| Mode      | ("text"/"dialog") | "dialog"             | Specifies the display mode. For mode "dialog" the dialog library must be installed. |
+| MODE      | ("text"/"dialog") | "dialog"             | Specifies the display mode. For mode "dialog" the dialog library must be installed. |
 | XSESSIONS | path              | "/etc/blm/xsessions" | The X sessions directory path (see [Sessions](#sessions)).                          |
 | OSESSIONS | path              | "/etc/blm/osessions" | The directory path for non-X sessions.                                              |
 | MENUS     | path              | "/etc/blm/menus"     | The directory path containing sub-menus.                                            |
