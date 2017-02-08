@@ -32,19 +32,24 @@ shell, refer to the relevant documentation.
 To configure which sessions can be launched from the manager, create
 the relevant directories as specified in your configuration file.
 
-Options:
+### Options:
 
-- PS3 :: Specifies the prompt.
-- MODE :: "text"/"dialog" Specifies the display mode. For mode
-  "dialog" the dialog library must be installed.
-- XSESSIONS :: The x sessions directory path (see [Sessions](#sessions)).
-- OSESSIONS :: The directory path for non-x sessions.
-- MENUS :: The directory path containing sub-menus.
 
-Dialog-specific options:
-- HEIGHT :: The height of the dialog.
-- WIDTH :: The width of the dialog.
-- ITEMHEIGHT :: The height of items in the dialog.
+
+| Option    | Values            | Default              | Function                                                                            |
+|-----------|-------------------|----------------------|-------------------------------------------------------------------------------------|
+| PS3       | string            | "Select session: "   | Specifies the prompt.                                                               |
+| Mode      | ("text"/"dialog") | "dialog"             | Specifies the display mode. For mode "dialog" the dialog library must be installed. |
+| XSESSIONS | path              | "/etc/blm/xsessions" | The X sessions directory path (see [Sessions](#sessions)).                          |
+| OSESSIONS | path              | "/etc/blm/osessions" | The directory path for non-X sessions.                                              |
+| MENUS     | path              | "/etc/blm/menus"     | The directory path containing sub-menus.                                            |
+
+### Dialog-specific options:
+| Option     | Values | Default | Function                           |
+|------------|--------|---------|------------------------------------|
+| HEIGHT     | number |      14 | The height of the dialog.          |
+| WIDTH      | number |      55 | The width of the dialog.           |
+| ITEMHEIGHT | number |       6 | The height of items in the dialog. |
 
 ### Sessions
 There are 2 session types:
