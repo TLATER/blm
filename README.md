@@ -2,18 +2,6 @@
 A login manager written entirely in bash.
 
 ## Setup
-
-### Global installation
-Simply run ./install.sh. This will move the script to /bin and the
-configuration to /etc/blm.
-
-### Local installation
-Copy the reference blm.config file to either of:
-
-- `$HOME/.config/blm/blm.conf`
-- `$HOME/.blm.conf`
-
-### Enabling
 Disable any graphical login managers (many Linux distributions come
 with such preinstalled). Refer to the relevant documentation when in
 doubt.
@@ -21,7 +9,7 @@ doubt.
 Then execute
 
 ```
-echo '. /path/to/blm' >> ~/.bash_profile
+echo '. blm' >> ~/.bash_profile
 ```
 
 to enable launching the script on login. When using a non-bash login
