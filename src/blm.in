@@ -25,8 +25,8 @@ if [ -f "$HOME/.config/blm/blm.conf" ]; then
     CONF="$HOME/.config/blm/blm.conf"
 elif [ -f "$HOME/.blm.conf" ]; then
     CONF="$HOME/.blm.conf"
-elif [ -f "/etc/blm.conf" ]; then
-    CONF="/etc/blm.conf"
+elif [ -f "@datadir@/blm.conf" ]; then
+    CONF="@datadir@/blm.conf"
 else
     echo "No config file found. Falling back to shell."
     return 1
