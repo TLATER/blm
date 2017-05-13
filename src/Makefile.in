@@ -221,7 +221,7 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 bin_SCRIPTS = blm
 CLEANFILES = $(bin_SCRIPTS)
-EXTRA_DIST = $(srcdir)blm.in
+EXTRA_DIST = $(srcdir)/init.sh.in $(srcdir)/dialog.sh.in $(srcdir)/select.sh.in $(srcdir)/main.sh.in
 do_subst = sed -e 's,[@]datadir[@],$(datadir),g'
 all: all-am
 
@@ -235,9 +235,9 @@ $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign src/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu src/Makefile'; \
 	$(am__cd) $(top_srcdir) && \
-	  $(AUTOMAKE) --foreign src/Makefile
+	  $(AUTOMAKE) --gnu src/Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
 	  *config.status*) \
@@ -448,8 +448,8 @@ uninstall-am: uninstall-binSCRIPTS
 .PRECIOUS: Makefile
 
 
-blm: blm.in Makefile
-	$(do_subst) < $(srcdir)/blm.in > blm
+blm: $(EXTRA_DIST)
+	$(do_subst) < /dev/null $^ > $@
 	chmod +x blm
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.

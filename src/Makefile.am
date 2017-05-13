@@ -1,9 +1,9 @@
 bin_SCRIPTS = blm
 CLEANFILES = $(bin_SCRIPTS)
-EXTRA_DIST = $(srcdir)blm.in
+EXTRA_DIST = $(srcdir)/init.sh.in $(srcdir)/dialog.sh.in $(srcdir)/select.sh.in $(srcdir)/main.sh.in
 
 do_subst = sed -e 's,[@]datadir[@],$(datadir),g'
 
-blm: blm.in Makefile
-	$(do_subst) < $(srcdir)/blm.in > blm
+blm: $(EXTRA_DIST)
+	$(do_subst) < /dev/null $^ > $@
 	chmod +x blm

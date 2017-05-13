@@ -1,0 +1,80 @@
+# Initialization module.
+
+# Ensure that it is safe to launch blm in the current environment,
+# exit if not.
+check_env() {
+    # Don't re-launch blm in this session.
+    if [ "$NOLM" ]; then
+        exit 1
+    fi
+
+    export NOLM=true
+
+    # Ensure that we are in a login shell. This is bash-specific, so the
+    # script won't work for other shells.
+    if [ ! "$(shopt -q login_shell)" ]; then
+        exit 1
+    fi
+}
+
+# Set the options specified in all found configuration files.
+# Configurations are loaded in the correct order, starting with the
+# lowers priority (default system) and going to the highest priority
+# (user configuration).
+#
+# All options are dumped into their respective global variables, as in
+# read_config. This can have nasty side-effects, but at least it does
+# not execute code, and these files should be configured by the user
+# anyway.
+set_config() {
+    local confpath
+
+    # Set the default configuration.
+    PS3="Select session: "
+    MODE="dialog"
+    HEIGHT=15
+    ITEMHEIGHT=5
+    WIDTH=55
+    XSESSIONS="$HOME/.config/blm/xsessions"
+    OSESSIONS="$HOME/.config/blm/osessions"
+
+    # Read the system default configuration.
+    if [ -f "@datadir@/blm/blm.conf" ]; then
+        read_config "@datadir@/blm/blm.conf"
+    fi
+
+    # Read XDG default dir configurations.
+    confpath=":${XDG_CONFIG_HOME:-$HOME/.config}:${XDG_CONFIG_DIRS:-/etc/xdg}"
+    while [ -n "$confpath" ]; do
+        cur="${confpath##*:}"
+
+        if [ -n "$cur" ] && [ -f "$cur/blm/blm.conf" ]; then
+            read_config "$cur/blm/blm.conf"
+        fi
+
+        confpath="${confpath%:*}"
+    done
+
+    # Read $HOME/.blm.conf
+    if [ -f "$HOME/.blm.conf" ]; then
+        read_config "$HOME/.blm.conf"
+    fi
+}
+
+# Apply configuration (credit http://stackoverflow.com/a/20815951)
+read_config() {
+    # Read through all lines of the given config file, setting all
+    # defined variables to global variables.
+    while IFS='= ' read -r lhs rhs; do
+        if [[ ! $lhs =~ ^\ *# && -n $lhs ]]; then
+            rhs="${rhs%%\#*}"    # Del in line right comments
+            rhs="${rhs%%*( )}"   # Del trailing spaces
+            rhs="${rhs%\"*}"     # Del opening string quotes
+            rhs="${rhs#\"*}"     # Del closing string quotes
+            read -rd"\0" "$lhs" <<< "$rhs"
+        fi
+    done < "$1"
+
+    # Restore IFS
+    IFS=$' \t\n'
+}

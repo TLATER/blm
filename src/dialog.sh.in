@@ -1,0 +1,35 @@
+# Dialog-specific menu module.
+
+# Prepend a number to each session in the given string.
+prepend_session_number() {
+    local i=1
+    local sessions=("$@")
+    local accumulated=""
+
+    for session in "${sessions[@]}"; do
+        accumulated="$accumulated"$(( i++ ))" ""$(basename "$session") "
+    done
+
+    echo "$accumulated"
+}
+
+# Prompt for a session file using dialog.
+get_session_with_dialog() (
+    local reply
+    local session
+    local sessions=("$@")
+    local session_nums=$(prepend_session_number "${sessions[@]}")
+
+    dialog --title "blm" --menu "$PS3" "$HEIGHT" "$WIDTH" "$ITEMHEIGHT" $session_nums 2>/tmp/blm
+
+    reply=$(( $(cat "/tmp/blm") - 1))
+    session="${sessions[$reply]}"
+
+    if [ -f "$session" ]; then
+        echo "$session" > /tmp/blm
+        return
+    else
+        sessions=("$session"/*)
+        get_session_with_dialog "${sessions[@]}"
+    fi
+)

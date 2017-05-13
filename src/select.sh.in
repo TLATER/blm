@@ -1,0 +1,30 @@
+remove_directory() {
+    local sessions=("$@")
+    local accumulated=""
+
+    for session in "${sessions[@]}"; do
+        accumulated="$accumulated"$'\n'"$(basename "$session")"
+    done
+
+    echo "$accumulated"
+}
+
+get_session_with_select () {
+    local session
+    local sessions=("$@")
+
+    IFS=$'\n'
+    select session in $(remove_directory "${sessions[@]}"); do
+        REPLY=$(( REPLY - 1 ))
+        session="${sessions[$REPLY]}"
+
+        if [ -f "$session" ]; then
+            echo "$session" > /tmp/blm
+        else
+            sessions=("$session"/*)
+            get_session_with_select "${sessions[@]}"
+        fi
+
+        break
+    done
+}

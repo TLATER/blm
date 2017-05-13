@@ -1,0 +1,44 @@
+# Main script.
+
+# Get the current tty and an available display
+get_requirements() {
+    local display=0
+    export DISPLAY=:0
+
+    while [[ `xset -q` ]]; do
+        ((display++))
+        DISPLAY=:$display
+    done
+    clear
+
+    DISPLAY=:$display
+    TTY=`fgconsole`
+}
+
+run_xsession() {
+    # get_requirements
+    echo exec /usr/bin/xinit "$1" -- "$DISPLAY" vt"$TTY"
+}
+
+run_osession() {
+    echo exec "$1"
+}
+
+# check_env
+set_config
+
+sessions=("$XSESSIONS"/* "$OSESSIONS"/*)
+
+if [ "$MODE" = "dialog" ]; then
+    get_session_with_dialog "${sessions[@]}"
+else
+    get_session_with_select "${sessions[@]}"
+fi
+
+session=$(cat "/tmp/blm")
+
+if [[ "$session" == "$XSESSIONS"* ]]; then
+    run_xsession "$session"
+else
+    run_osession "$session"
+fi
