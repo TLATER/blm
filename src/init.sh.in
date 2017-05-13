@@ -4,15 +4,14 @@
 # exit if not.
 check_env() {
     # Don't re-launch blm in this session.
-    if [ "$NOLM" ]; then
+    if [ ! -z "${NOLM+x}" ]; then
         exit 1
     fi
 
     export NOLM=true
 
-    # Ensure that we are in a login shell. This is bash-specific, so the
-    # script won't work for other shells.
-    if [ ! "$(shopt -q login_shell)" ]; then
+    # Ensure that we are in a login shell.
+    if [[ ! $(tty) == "/dev/tty"[0-9]* ]]; then
         exit 1
     fi
 }

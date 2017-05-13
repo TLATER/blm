@@ -1,5 +1,10 @@
 # Main script.
 
+error() {
+    echo "$1" >2
+    exit 1
+}
+
 # Get the current tty and an available display
 get_requirements() {
     local display=0
@@ -16,15 +21,15 @@ get_requirements() {
 }
 
 run_xsession() {
-    # get_requirements
-    echo exec /usr/bin/xinit "$1" -- "$DISPLAY" vt"$TTY"
+    get_requirements
+    exec /usr/bin/xinit "$1" -- "$DISPLAY" vt"$TTY"
 }
 
 run_osession() {
-    echo exec "$1"
+    exec "$1"
 }
 
-# check_env
+check_env
 set_config
 
 sessions=("$XSESSIONS"/* "$OSESSIONS"/*)
@@ -36,6 +41,9 @@ else
 fi
 
 session=$(cat "/tmp/blm")
+if [ ! -f "$session" ]; then
+    exit
+fi
 
 if [[ "$session" == "$XSESSIONS"* ]]; then
     run_xsession "$session"
