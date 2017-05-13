@@ -3,7 +3,7 @@ A login manager written entirely in bash.
 
 ## Setup
 1. Disable any graphical login managers (many Linux distributions come with such preinstalled). Refer to the relevant documentation when in doubt.
-2. Execute `echo '. blm' >> ~/.bash_profile` to enable launching the script on login. When using a non-bash login shell, refer to the relevant documentation.
+2. Execute `echo 'exec bash blm' >> ~/.bash_profile` to enable launching the script on login. When using a non-bash login shell, refer to the relevant documentation.
 
 ## Configuration
 To configure which sessions can be launched from the manager, create
@@ -16,7 +16,6 @@ the relevant directories as specified in your configuration file.
 | MODE      | ("text"/"dialog") | "dialog"             | Specifies the display mode. For mode "dialog" the dialog library must be installed. |
 | XSESSIONS | path              | "/etc/blm/xsessions" | The X sessions directory path (see [Sessions](#sessions)).                          |
 | OSESSIONS | path              | "/etc/blm/osessions" | The directory path for non-X sessions.                                              |
-| MENUS     | path              | "/etc/blm/menus"     | The directory path containing sub-menus.                                            |
 
 ### Dialog-specific options:
 | Option     | Values | Default | Function                           |
@@ -35,10 +34,7 @@ There are 2 session types:
   that are executed. A simple example would be, for example, `exec
   /bin/bash` for a normal tty.
 
-Besides these, "menus" can be created.
-
-Menus are subdirectories of the `$MENUS` directory, which in turn
-contain an xsessions and osessions directory.  In these the items of
+Menus are subdirectories of these directories.  In these the items of
 sub-menus can be specified.
 
 ### Example
@@ -48,17 +44,14 @@ For example, by default the following structure would work:
 ```
 .config/blm
 ├── blm.conf
-├── menus
-│   ├── remote
-│   │   └── osessions
-│   │       └── my.fav.server.net
-│   └── shutdown
-│       └── osessions
-│           ├── reboot
-│           └── shutdown
 ├── osessions
 │   ├── bash
-│   └── emacs
+│   ├── emacs
+│   ├── remote
+│   │   └── my.fav.server.net
+│   └── shutdown
+│       ├── reboot
+│       └── shutdown
 └── xsessions
     ├── awesome
     └── Gnome
