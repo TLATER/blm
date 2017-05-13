@@ -2,7 +2,7 @@
 
 error() {
     echo "$1" >2
-    exit 1
+    exec "$SHELL"
 }
 
 # Get the current tty and an available display
@@ -42,7 +42,7 @@ fi
 
 session=$(cat "/tmp/blm")
 if [ ! -f "$session" ]; then
-    exit
+    exec "$SHELL"
 fi
 
 if [[ "$session" == "$XSESSIONS"* ]]; then

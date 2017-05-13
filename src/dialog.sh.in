@@ -23,7 +23,7 @@ get_session_with_dialog() (
     dialog --title "blm" --menu "$PS3" "$HEIGHT" "$WIDTH" "$ITEMHEIGHT" $session_nums 2>/tmp/blm
 
     if [ $? -eq 1 ]; then
-        exit
+        return
     fi
 
     reply=$(( $(cat "/tmp/blm") - 1))

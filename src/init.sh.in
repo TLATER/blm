@@ -5,14 +5,14 @@
 check_env() {
     # Don't re-launch blm in this session.
     if [ ! -z "${NOLM+x}" ]; then
-        exit 1
+        exec "$SHELL"
     fi
 
     export NOLM=true
 
     # Ensure that we are in a login shell.
     if [[ ! $(tty) == "/dev/tty"[0-9]* ]]; then
-        exit 1
+        exec "$SHELL"
     fi
 }
 
