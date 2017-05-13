@@ -2,40 +2,14 @@
 A login manager written entirely in bash.
 
 ## Setup
-
-### Global installation
-Simply run ./install.sh. This will move the script to /bin and the
-configuration to /etc/blm.
-
-### Local installation
-Copy the reference blm.config file to either of:
-
-- `$HOME/.config/blm/blm.conf`
-- `$HOME/.blm.conf`
-
-### Enabling
-Disable any graphical login managers (many Linux distributions come
-with such preinstalled). Refer to the relevant documentation when in
-doubt.
-
-Then execute
-
-```
-echo '. /path/to/blm' >> ~/.bash_profile
-```
-
-to enable launching the script on login. When using a non-bash login
-shell, refer to the relevant documentation.
-
+1. Disable any graphical login managers (many Linux distributions come with such preinstalled). Refer to the relevant documentation when in doubt.
+2. Execute `echo '. blm' >> ~/.bash_profile` to enable launching the script on login. When using a non-bash login shell, refer to the relevant documentation.
 
 ## Configuration
 To configure which sessions can be launched from the manager, create
 the relevant directories as specified in your configuration file.
 
 ### Options:
-
-
-
 | Option    | Values            | Default              | Function                                                                            |
 |-----------|-------------------|----------------------|-------------------------------------------------------------------------------------|
 | PS3       | string            | "Select session: "   | Specifies the prompt.                                                               |
